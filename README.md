@@ -1,6 +1,6 @@
 # Getting Started with MATLAB&reg; in Docker
 
-
+Running MATLAB inside a docker container can be challenging if you're building it on your own. Fortunatly, we've done most of the work for you.  This set of tutorials will walk you through the steps to downloading, running and even building your own MATLAB containers. 
 
 ## Lessons
 [Running a MATLAB Container](#runmatlab)
@@ -116,6 +116,8 @@ That's a great start but what MATLAB is much more interesting if you can access 
 <a name="desktop"></a>
 ## Running MATLAB Desktop in a container
 
+The image provides a convient option to run in VNC mode.  This will let you connect either a browser or a VNC client to access the desktop.  We can access those with docker run command.
+
 ### Launching with VNC mode
 ```bash
 docker run -it --rm -p 5901:5901 -p 6080:6080 mathworks/matlab -vnc
@@ -150,6 +152,16 @@ If you're running on Linux there is a more direct way to access the desktop usin
 <a name="batch"></a>
 ## Running MATLAB in Batch Mode
 
+```bash
+docker run -it --rm mathworks/matlab -batch "magic(6)"
+```
+
+> show error
+
+```bash
+docker run -it --rm -MLM_LICENSE_FILE=27000@34.236.77.189 mathworks/matlab -batch "magic(6)"
+```
+> show results
 
 <a name="files"></a>
 ## Accessing files
