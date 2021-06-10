@@ -1,4 +1,4 @@
-# Docker SKO 2020 Demos & Resources
+# Getting Started with MATLAB in Docker
 
 ## Lessons
 [Running a Container](#run)
