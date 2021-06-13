@@ -2,6 +2,14 @@
 
 Running MATLAB inside a docker container can be challenging if you're building it on your own. Fortunatly, we've done most of the work for you.  This set of tutorials will walk you through the steps to downloading, running and even building your own MATLAB containers. 
 
+## Docker Components
+
+There are two primary components to docker, the Docker Engine and Docker Client.   The Engine is a background process that manages the containers. The client is the command line tool used to build and run containers.  Once installed you don't generally need to worry about the engine.  You'll interact with docker using the client.
+
+## Install Docker
+
+To follow these tutorials you'll need docker installed on your machine.  Head over to docker.com to [download and install](https://www.docker.com/products/docker-desktop) docker for your platform (Windows, Mac or Linux).  Once you're set up join me below to learn how to run MATLAB in containers.
+
 ## Lessons
 [Running a MATLAB Container](#runmatlab)
 
@@ -31,22 +39,6 @@ e.g. you can create a container with MATLAB Runtime and a compiled application a
 
 # Working with containers
 
-## Installing docker
-
-### Windows and Mac
-https://www.docker.com/products/docker-desktop
-
-### Linux
-```bash
-sudo apt-get update
-sudo apt install docker.io
-sudo systemctl start docker
-```
-
-## Docker Components
-
-There are two primary components to docker, the Docker Engine and Docker Client.   The Engine is a background process that manages the containers. The client is the command line tool used to build and run containers.  Once installed you don't generally need to worry about the engine.  You'll interact with docker using the client. 
-
 <a name="run"></a>
 ## Running MATLAB in a container
 
@@ -62,7 +54,7 @@ To download the image we tell docker which one to.  By default this will try to 
 To pull the latest matlab image we use the pull command.
 
 ```bash
-docker pull mathworks/matlab:r2021
+docker pull mathworks/matlab
 ```
 Docker will contact the registry and download the requested container image.  We've just pulled the latest image but it is possible to pull a specific version by using a tag.  For instance, we could have run ```docker pull matlab:r2021a```
 
@@ -155,23 +147,122 @@ If you're running on Linux there is a more direct way to access the desktop usin
 ```bash
 docker run -it --rm mathworks/matlab -batch "magic(6)"
 ```
-
-> show error
+![](images/batch-error.png)
 
 ```bash
-docker run -it --rm -MLM_LICENSE_FILE=27000@34.236.77.189 mathworks/matlab -batch "magic(6)"
+docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 mathworks/matlab -batch "magic(6)"
 ```
-> show results
+Insert the IP address in place of my clearly made up IP address.
+
+![](images/batch-done.png)
+
+
+```bash
+docker ps -a
+```
+
+![](images/batch-container-removed.png)
 
 <a name="files"></a>
 ## Accessing files
 
+Create a sample file in the current directory called "myscript.m".  We'll use this file as a batch command run by matlab.  
+
+```dos
+"magic(6)" > myscript.m
+```
+
+```bash
+docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "ls /mnt/scripts"
+```
+
+>results showing listing
+
+```bash
+docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "run('/mnt/scripts/myscript.m')"
+```
+
+> insert run results
+
+
 <a name="snapshots"></a>
 ## Customizing: Making snapshots
 
+MATLAB is great and all but it's even better with some toolboxes.  In this tutorial we'll add the Image Processing Toolbox to our container and snapshot an image from that.  We will then launch a new container based on our new customized image.
+
+1. Launch a MATLAB Container in vnc mode
+
+```bash
+docker run -it --rm -p 6080:6080 mathworks/matlab -vnc
+```
+
+2. Run MATLAB as sudo
+
+```bash
+sudo matlab
+```
+
+ ![](images/sudo-matlab.png)
+
+3. Add Image Processing Toolbox (or another if you like)
+
+![](images/install-image-processing.png)
+
+![](images/matlab-ver.png)
+
+4. Snapshot the image
+
+Open a new command window
+```docker
+docker ps -a
+```
+![](images/snapshot-image-1.png)
+
+Snapshot the image by commiting the current container
+
+```docker
+docker commit intesting_liskov mymatlab:imageprocessing
+```
+
+![](images/snapshot-image-2.png)
+
+Launch a new container based on our new image
+
+```docker
+docker run -it --rm -p 6080:6080 mymatlab:imageprocessing -vnc
+```
+
+Run ver again and you'll see that image processing is already installed in this image. 
 
 <a name="build"></a>
 ## Customizing: Build your own image
+
+Let's learn how we can build our own image using a Dockerfile.  In this tutorial, we'll write our own Dockerfile to include a script file in the image which will run matlab batch for us.
+
+Create a new document called "Dockerfile".  Ensure you don't end up with an extension.
+
+```Dockerfile
+# Build from MATLAB base image
+FROM mathworks/matlab:latest
+
+# Copy your script into the image
+COPY myscript.m ./
+
+# Start MATLAB in batch mode to execute script
+CMD ["matlab", "-batch", "myscript"]
+```
+
+```docker
+docker build -t matlab:withscript .
+```
+
+```docker
+docker run -it --rm matlab:withscript
+```
+
+```docker
+docker rmi matlab:withscript
+```
 
 <a name="build"></a>
 ## Customizing: Build from scratch
