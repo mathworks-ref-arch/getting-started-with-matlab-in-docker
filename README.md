@@ -11,35 +11,23 @@ There are two primary components to docker, the Docker Engine and Docker Client.
 To follow these tutorials you'll need docker installed on your machine.  Head over to docker.com to [download and install](https://www.docker.com/products/docker-desktop) docker for your platform (Windows, Mac or Linux).  Once you're set up join me below to learn how to run MATLAB in containers.
 
 ## Lessons
-[Running a MATLAB Container](#runmatlab)
+[Running: Starting a MATLAB Container](#running-matlab-in-a-container)
 
-[Accessing the MATLAB Desktop](#desktop)
+[Running: The MATLAB Desktop](#running-matlab-desktop-in-a-container)
 
-[Running in Batch Mode](#runbatch)
+[Running: Batch Mode](#running-matlab-in-batch-mode)
 
-[Accessing files](#files)
+[Running: Accessing files](#accessing-files)
 
-[Image snapshots](#snapshots)
+[Customizing: Taking Snapshots](#customizing-making-snapshots)
 
-[Customizing a MATLAB Container Image](#buildmatlab)
+[Customizing: Build your own MATLAB docker image](#customizing-build-your-own-image)
 
-[Building from scratch](#buildscratch)
+[Customizing: Building from Scratch](#customizing-build-from-scratch)
 
-## Resources
-- MATLAB-Deps container image 
-https://hub.docker.com/r/mathworks/matlab-deps
-- MathWorks Dockerfile for DIY on GitHub
-https://github.com/mathworks-ref-arch/matlab-dockerfile
-- MATLAB Deep Learning Image on Nvidia GPU Cloud
-https://ngc.nvidia.com/catalog/containers/partners:matlab
-https://insidelabs-git.mathworks.com/jlmartin/docker/tree/master/nvidia-gpu-cloud/matlab-r2019b
-
-Note that you can put anything in a container.  It's not a matter of whether you can but whether you should. Match the solution to the use case.
-e.g. you can create a container with MATLAB Runtime and a compiled application and deploy it to multiple servers but Production Server would be a better match for this use case.
 
 # Working with containers
 
-<a name="run"></a>
 ## Running MATLAB in a container
 
 In this tutorial, you'll learn how to use the docker client to pull and run containers from existing images, view the images and containers on your machine, and delete images and containers.
@@ -67,7 +55,6 @@ This will list the images on this machine
 ![](images/docker-images.png)
 
 Now that we have the image we'll start a container from it using the run command.  
-
 ### Run a container
 ```bash
 docker -it mathworks/matlab
@@ -118,8 +105,6 @@ You can specify the license server you want the container to acquire licenses fr
 
 We're off to a good start but MATLAB is much more interesting if you can access the Desktop.  Let's see how we do that next.
 
-
-<a name="desktop"></a>
 ## Running MATLAB Desktop in a container
 
 The image provides a convient option to run in [VNC](http://www.remoteaccess.org/what-is-a-vnc/) mode.  This will let you connect either a browser or a VNC client to access the desktop.  We can access those with docker run command.
@@ -155,7 +140,6 @@ If you're running on Linux there is a more direct way to access the desktop usin
 
 The desktop is great for design work but containers are very useful for background tasks and as part of continuous integration (CI/CD) workflows.  For those workflows batch mode is more convenient.
 
-<a name="batch"></a>
 ## Running MATLAB in Batch Mode
 
 To launch a MATLAB container in batch mode we simply pass the -batch switch to the image.  This is a special switch for the container so make sure it follows the image name.  We then put the code we want to run as part of the batch operation in quotes.  Here is how we can run the magic command in batch mode.
@@ -322,4 +306,13 @@ docker rmi matlab:withscript
 <a name="build"></a>
 ## Customizing: Build from scratch
 
-You can have full control over the selection of products or the operating system then you'll want to build your own using a Dockerfile.  A great place to start is this Dockerfile that includes a lot of the configuration you may need for your own container.  It is based on the mathworks/matlab-deps container image, an image that includes all the common dependencies required by MATLAB and related products.  If you would like a different OS than Ubuntu then you'll need to build those dependencies from scratch.  
+You can have full control over the selection of products or the operating system then you'll want to build your own using a Dockerfile.  A great place to start is this [MATLAB Dockerfile reference](https://github.com/mathworks-ref-arch/matlab-dockerfile) that includes a lot of the configuration you may need for your own container.  It is based on the [mathworks/matlab-deps container image](https://hub.docker.com/r/mathworks/matlab-deps), an image that includes all the common dependencies required by MATLAB and related products.  If you would like a different OS than Ubuntu then you'll need to build those dependencies from scratch. 
+
+## Resources
+- MATLAB-Deps container image 
+https://hub.docker.com/r/mathworks/matlab-deps
+- MathWorks Dockerfile for DIY on GitHub
+https://github.com/mathworks-ref-arch/matlab-dockerfile
+- MATLAB Deep Learning Image on Nvidia GPU Cloud
+https://ngc.nvidia.com/catalog/containers/partners:matlab
+https://insidelabs-git.mathworks.com/jlmartin/docker/tree/master/nvidia-gpu-cloud/matlab-r2019b
