@@ -49,14 +49,14 @@ We'll get started by using the basic MATLAB docker image published by MathWorks.
 To run a container we'll first need to locate one.  The primary place to find container images is [DockerHub](https://dockerhub.com), a centralized docker container image registry. There you'll find thousands of containers for all sorts of uses.  A registry is where images are stored and distributed.  Images are stored in individual repositories which hold all the versions of an image.  Since we're interested in MATLAB we can find it at https://hub.docker.com/r/mathworks/matlab.
 
 ### Pull a container
-To download the image we tell docker which one to.  By default this will try to find the image on DockerHub.  
+To download the image we tell docker which one we want.  By default this will try to find the image on DockerHub.  
 
 To pull the latest matlab image we use the pull command.
 
 ```bash
 docker pull mathworks/matlab
 ```
-Docker will contact the registry and download the requested container image.  We've just pulled the latest image but it is possible to pull a specific version by using a tag.  For instance, we could have run ```docker pull matlab:r2021a```
+Docker will contact the registry and download the requested image.  We've just pulled the latest image but it is possible to pull a specific version by using a tag.  For instance, we could have run ```docker pull matlab:r2021a```
 
 This will take some time depending on your bandwidth since the image is pretty big.  Once the download completes we can view the image.
 
@@ -66,17 +66,17 @@ docker images
 This will list the images on this machine
 ![](images/docker-images.png)
 
-Now that we have the image we'll start a container from it using the run command*.  
+Now that we have the image we'll start a container from it using the run command.  
 
 ### Run a container
 ```bash
 docker -it mathworks/matlab
 ```
 
-This will launch MATLAB.  The ```-it``` switch indicates we want an interactive terminal.  
+This will launch MATLAB.  The ```-it``` switch indicates we want an interactive terminal.  We use this so the container doesn't exit right away.
 
 #### Licensing check
-By default this container is configured to use Online Licensing so if you have an individual license or your organization is setup to use Online  Licensing enter your MathWorks Account username and password. 
+By default this container is configured to use Online Licensing so if you have an individual license or your organization is setup to use Online Licensing enter your MathWorks Account username and password. If you cannot use Online Licensing see the batch example below on how to specify a license server below.
 
 ![](images/run-matlab.png)
 
@@ -103,12 +103,26 @@ The container may be gone but the image persists.  Run ```docker images``` again
 
 ![](images/docker-images.png)
 
-That's a great start but what MATLAB is much more interesting if you can access the Desktop.  Let's see how we can do that.
+
+
+<a name="license"></a>
+### License Server
+
+Online Licensing isn't always an option and in some cases isn't a desired workflow (e.g. batch).  Fortunately, we can tell MATLAB to use our license server instead.  Here's how we do that when running the container.
+
+```docker
+docker run -it --rm -e MLM_LICENSE_FILE=27000@12.123.12.123 mathworks/matlab
+```
+
+You can specify the license server you want the container to acquire licenses from by passing an environment variable with the -e option when you launch a container.  This will set up an environment variable within the container.  MATLAB conveniently looks for MLM_LICENSE_FILE when starting and will use it for the licensing.  You'll need to replace my obviously face IP address (12.123.12.123) with you're own server's address.  Your admin should be able to help you out if you don't have know what it is.
+
+We're off to a good start but MATLAB is much more interesting if you can access the Desktop.  Let's see how we do that next.
+
 
 <a name="desktop"></a>
 ## Running MATLAB Desktop in a container
 
-The image provides a convient option to run in VNC mode.  This will let you connect either a browser or a VNC client to access the desktop.  We can access those with docker run command.
+The image provides a convient option to run in [VNC](http://www.remoteaccess.org/what-is-a-vnc/) mode.  This will let you connect either a browser or a VNC client to access the desktop.  We can access those with docker run command.
 
 ### Launching with VNC mode
 ```bash
@@ -121,41 +135,48 @@ There's a whole lot going on in the line so let's break it down.
  `-p` opens a port.  Containers run in an isolated environment so we need to tell docker which ports to allow into the container.  The first number is the port on the host machine (your machine if running locally) and the second is the port inside the container.  when we navigate to a port on the localhost it is redirected to the container's port.  The first port 5901 is the standard VNC port which you can see in action below.  The second port is for web access to the VNC session.  We'll see that in just a moment.
  `-vnc` This isn't a docker option.  It's an option sent to the matlab image when it starts up.  There are several switches.  Run ```docker run mathworks/matlab -help``` to see all the options
 
-> insert output image
-
 ### Connecting to the desktop in a browser
-Open a web browser and navigate to ```localhost:6080```.  You should see a desktop in your browser.  Double-click the MATLAB icon on that desktop and you'll be prompted like before.  Enter your MathWorks Account credentials, select a license if necessary and now you can use the MATLAB desktop.  
+Open a web browser and navigate to ```localhost:6080```.  You should see a desktop in your browser.  Double-click the MATLAB icon on the desktop and you'll be prompted to sign in as before.  Enter your MathWorks Account credentials, select a license if necessary and now you can use the MATLAB desktop.  
 
 ![](images/vnc-in-browser.png)
 
 ### Using a VNC client
-That other port mapping we provided is the standard VNC port.  If you have a VNC client on your machine you can open that and enter ```localhost:1``` when prompted and enter the password.  By default that is *matlab*.  You can change the password used when you launch the container if you prefer.
+That other port mapping we provided is the standard VNC port (5901).  If you have a VNC client on your machine you can open that and enter ```localhost:1``` when prompted and enter the password.  By default that is *matlab*.  You can change the password used when you launch the container if you prefer.
 
-Once you connect you'll see the same window as you saw in the browser.  If you have them both open at the same time you'll notice they are views into the same desktop session.  
+Once you connect you'll see the same window as you saw in the browser.  If you have them both open at the same time you'll notice they are views into the same desktop session.
 
-You may see a warning when running the container to provide it more memory.  
+You may see a warning when running the container to provide it more memory.  For our tutorial it isn't a big deal but you'll need to specify more memory for the container when it runs.  Use the --shm-size command to increase it when launching the container.
+
 ```bash
 docker run -it --rm -p 5901:5901 -p 6080:6080 --shm-size=512M  mathworks/matlab -vnc
 ```
 
 If you're running on Linux there is a more direct way to access the desktop using X11.  See https://hub.docker.com/r/mathworks/matlab for details.
 
+The desktop is great for design work but containers are very useful for background tasks and as part of continuous integration (CI/CD) workflows.  For those workflows batch mode is more convenient.
 
 <a name="batch"></a>
 ## Running MATLAB in Batch Mode
 
+To launch a MATLAB container in batch mode we simply pass the -batch switch to the image.  This is a special switch for the container so make sure it follows the image name.  We then put the code we want to run as part of the batch operation in quotes.  Here is how we can run the magic command in batch mode.
+
 ```bash
 docker run -it --rm mathworks/matlab -batch "magic(6)"
 ```
+If you run this you'll notice an error immediately.  
+
 ![](images/batch-error.png)
+
+Batch mode requires a license server to run.  We can fix that by providing the environment variable MLM_LICENSE_FILE with the -e option when you launch a container.  This will set up an environment variable within the container.  MATLAB conveniently looks for MLM_LICENSE_FILE when starting and will use it for the licensing.  You'll need to replace my obviously face IP address (12.123.12.123) with you're own server's address.  Your admin should be able to help you out if you don't have know what it is.
 
 ```bash
 docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 mathworks/matlab -batch "magic(6)"
 ```
-Insert the IP address in place of my clearly made up IP address.
+The container will launch and if there are no errors the container will exit.
 
 ![](images/batch-done.png)
 
+We can check to see if there are any contianers still around.
 
 ```bash
 docker ps -a
@@ -163,8 +184,14 @@ docker ps -a
 
 ![](images/batch-container-removed.png)
 
+As you can see they have been cleaned up including the one that produced an error earlier.
+
+Batch commands are easy to run but specifying the code on every one is tedious. A better option is to load a file that contains the code we want to run.  Guess what we're going to do next?
+
 <a name="files"></a>
 ## Accessing files
+
+To use files with a container we need to mount a volume.  We'll mount a directory so the our container can run a file from it.  First we need to create the script to run.
 
 Create a sample file in the current directory called "myscript.m".  We'll use this file as a batch command run by matlab.  
 
@@ -172,11 +199,18 @@ Create a sample file in the current directory called "myscript.m".  We'll use th
 "magic(6)" > myscript.m
 ```
 
+Next we need to mount the volume.  We do that using the -v option.  This lets us specify which directory from our host machine should be mounted in the container.  In the example below we specify the current working directory using the special string "${PWD}".  This prints the current directory path same as <code>pwd</code> on the command line.  The path after the colon is where this directory is mapped within the container.  In this case a directory called /mnt/scripts.
+
+Run the following to list the contents of the mounted directory.
+
 ```bash
 docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "ls /mnt/scripts"
 ```
-
 >results showing listing
+
+This should match the directory listing on the local host since they are pointing at the same directory.
+
+We can run the script by passing it to the run command.  Note how we use the full path to find the script to run.
 
 ```bash
 docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "run('/mnt/scripts/myscript.m')"
@@ -184,19 +218,18 @@ docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/script
 
 > insert run results
 
-
 <a name="snapshots"></a>
 ## Customizing: Making snapshots
 
-MATLAB is great and all but it's even better with some toolboxes.  In this tutorial we'll add the Image Processing Toolbox to our container and snapshot an image from that.  We will then launch a new container based on our new customized image.
+MATLAB is great and all but it's even better with some toolboxes.  In this tutorial we'll add the Image Processing Toolbox (or pick one of your favorites) to our container and snapshot an image from that.  We will then launch a new container based on our new customized image.
 
-1. Launch a MATLAB Container in vnc mode
+Launch a MATLAB Container in vnc mode so we can access the desktop client.
 
 ```bash
 docker run -it --rm -p 6080:6080 mathworks/matlab -vnc
 ```
 
-2. Run MATLAB as sudo
+Connect to the session usign https://localhost:6080 and open a MATE terminal. Click on the icon in the lower left of the desktop's task bar and select "System Tools>MATE Terminal".  We need to run MATLAB in admin mode in order to modify the installation.  To do that we run MATLAB as sudo mode.
 
 ```bash
 sudo matlab
@@ -204,21 +237,24 @@ sudo matlab
 
  ![](images/sudo-matlab.png)
 
-3. Add Image Processing Toolbox (or another if you like)
+Once in MATLAB click Add-Ons, search for Image Processing, click it's link and then click "Install".  This will launch the installer.  
 
 ![](images/install-image-processing.png)
 
+Once it downloads and completes the install it will relaunch MATLAB.  You can type 'ver" and verify that Image Processing Toolbox has been installed.
+
 ![](images/matlab-ver.png)
 
-4. Snapshot the image
+Close out of MATLAB (not the VNC session) so we can capture this image.  It's important to leave the container running at this point. 
 
-Open a new command window
+Open a new command window and check that the container is running
+
 ```docker
 docker ps -a
 ```
 ![](images/snapshot-image-1.png)
 
-Snapshot the image by commiting the current container
+Here we can see we have the one container running.  Use docker commit to create a snapshot.  We pass the name of the container (ID works as well) and provide a new image and tag name.  Say Cheese!  
 
 ```docker
 docker commit intesting_liskov mymatlab:imageprocessing
@@ -226,18 +262,18 @@ docker commit intesting_liskov mymatlab:imageprocessing
 
 ![](images/snapshot-image-2.png)
 
-Launch a new container based on our new image
+We now have our own image that contains both MATLAB and Image Processing.
+Let's launch a new container based on our new image.
 
 ```docker
 docker run -it --rm -p 6080:6080 mymatlab:imageprocessing -vnc
 ```
-
 Run ver again and you'll see that image processing is already installed in this image. 
 
 <a name="build"></a>
 ## Customizing: Build your own image
 
-Let's learn how we can build our own image using a Dockerfile.  In this tutorial, we'll write our own Dockerfile to include a script file in the image which will run matlab batch for us.
+Let's learn how we can build our own image using a Dockerfile.  A Dockerfile is used to define all the commands that when run, make up the image.  In this tutorial, we'll write our own Dockerfile to include a script file in the image which will run matlab batch for us.
 
 Create a new document called "Dockerfile".  Ensure you don't end up with an extension.
 
@@ -252,18 +288,37 @@ COPY myscript.m ./
 CMD ["matlab", "-batch", "myscript"]
 ```
 
+FROM specifies the starting point for the image we are building. In this case, we've specified the image mathworks/matlab:latest as our base image.  The rest of the commands will be applied based on that image.   
+
+COPY simply copies the specified file from our host computer into the image's working folder.
+
+CMD is a list of the commands that make up the command that is executed when the image is run.  In this case, matlab -batch "myscript" is what will run when launched.
+
+Make sure to save the file and we can issue the docker build command.  As part of building we can use -t to "tag" the image.  
+
 ```docker
 docker build -t matlab:withscript .
 ```
+
+List the images we now have locally.
+
+```docker
+docker images
+```
+Executing docker build has resulted in a new image named "matlab" with a tag of "withscript".  
+We need to specify both the name and tag to launch a container from this image.
 
 ```docker
 docker run -it --rm matlab:withscript
 ```
 
+The batch command runs.  Note that we can run this image anywhere.  We copied that script into the image when it was built and is now part of the image.
+
+Remove the image when you're done with it.
+
 ```docker
 docker rmi matlab:withscript
 ```
-
 <a name="build"></a>
 ## Customizing: Build from scratch
 
