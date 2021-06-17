@@ -57,7 +57,7 @@ This will list the images on this machine
 Now that we have the image we'll start a container from it using the run command.  
 ### Run a container
 ```bash
-docker -it mathworks/matlab
+docker run -it mathworks/matlab
 ```
 
 This will launch MATLAB.  The ```-it``` switch indicates we want an interactive terminal.  We use this so the container doesn't exit right away.
