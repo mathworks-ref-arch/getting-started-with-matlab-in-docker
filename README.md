@@ -1,6 +1,6 @@
 # Getting Started with MATLAB&reg; in Docker
 
-Running MATLAB&reg; inside a docker container can be challenging if you're building it on your own. Fortunatly, we've done most of the work for you.  This set of tutorials will walk you through the steps to downloading, running and even building your own MATLAB containers. 
+Running MATLAB&reg; inside a docker container can be challenging if you're building it on your own. Fortunately, we've done most of the work for you.  This set of tutorials will walk you through the steps to downloading, running and even building your own MATLAB containers. 
 
 ## Docker Components
 
