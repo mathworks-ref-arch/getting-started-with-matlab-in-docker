@@ -154,7 +154,7 @@ If you run this you'll notice an error immediately.
 Batch mode requires a license server to run.  We can fix that by providing the environment variable MLM_LICENSE_FILE with the -e option when you launch a container.  This will set up an environment variable within the container.  MATLAB conveniently looks for MLM_LICENSE_FILE when starting and will use it for the licensing.  You'll need to replace my obviously fake IP address (12.123.12.123) with your own server's address.  Your admin should be able to help you out if you don't have know what it is.
 
 ```bash
-docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 mathworks/matlab -batch "magic(6)"
+docker run -it --rm -e MLM_LICENSE_FILE=27000@12.123.12.123 mathworks/matlab -batch "magic(6)"
 ```
 The container will launch and if there are no errors the container will exit.
 
@@ -188,7 +188,7 @@ Next we need to mount the volume.  We do that using the -v option.  This lets us
 Run the following to list the contents of the mounted directory.
 
 ```bash
-docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "ls /mnt/scripts"
+docker run -it --rm -e MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "ls /mnt/scripts"
 ```
 
 This should match the directory listing on the local host since they are pointing at the same directory.
@@ -196,7 +196,7 @@ This should match the directory listing on the local host since they are pointin
 We can run the script by passing it to the run command.  Note how we use the full path to find the script to run.
 
 ```bash
-docker run -it --rm -MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "run('/mnt/scripts/myscript.m')"
+docker run -it --rm -e MLM_LICENSE_FILE=27000@12.123.12.123 -v "${PWD}:/mnt/scripts" mathworks/matlab -batch "run('/mnt/scripts/myscript.m')"
 ```
 
 <a name="snapshots"></a>
