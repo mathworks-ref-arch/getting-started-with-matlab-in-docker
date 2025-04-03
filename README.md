@@ -210,7 +210,7 @@ Launch a MATLAB Container in vnc mode so we can access the desktop client.
 docker run -it --rm -p 6080:6080 mathworks/matlab -vnc
 ```
 
-Connect to the session using https://localhost:6080 and open a MATE terminal. Click on the icon in the lower left of the desktop's task bar and select "System Tools>MATE Terminal".  We need to run MATLAB in admin mode in order to modify the installation.  To do that we run MATLAB as sudo mode.
+Connect to the session using ```https://localhost:6080``` and open a MATE terminal. Click on the icon in the lower left of the desktop's task bar and select "System Tools>MATE Terminal".  We need to run MATLAB in admin mode in order to modify the installation.  To do that we run MATLAB as sudo mode.
 
 ```bash
 sudo matlab
