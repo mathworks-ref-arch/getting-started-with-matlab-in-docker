@@ -34,7 +34,7 @@ In this tutorial, you'll learn how to use the docker client to pull and run cont
 
 We'll get started by using the basic MATLAB docker image published by MathWorks.  This container includes everything you need to run MATLAB and is a good starting point.
 
-To run a container we'll first need to locate one.  The primary place to find container images is [DockerHub](https://dockerhub.com), a centralized docker container image registry. There you'll find thousands of containers for all sorts of uses.  A registry is where images are stored and distributed.  Images are stored in individual repositories which hold all the versions of an image.  Since we're interested in MATLAB we can find it at https://hub.docker.com/r/mathworks/matlab.
+To run a container we'll first need to locate one.  The primary place to find container images is [DockerHub](https://hub.docker.com), a centralized docker container image registry. There you'll find thousands of containers for all sorts of uses.  A registry is where images are stored and distributed.  Images are stored in individual repositories which hold all the versions of an image.  Since we're interested in MATLAB we can find it at https://hub.docker.com/r/mathworks/matlab.
 
 ### Pull a container
 To download the image we tell docker which one we want.  By default this will try to find the image on DockerHub.  
